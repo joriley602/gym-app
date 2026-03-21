@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#ffffff">
+<title>John's Gym App</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f7fa; --bg2: #ffffff; --bg3: #eef1f5;
+    --green: #0f8a5f; --green-l: #12a872; --green-dim: #e0f5ee; --green-text: #0a6b49;
+    --amber: #c47a00; --amber-dim: #fff4d6; --amber-text: #7a4c00;
+    --blue: #1a65c0; --blue-dim: #e6f0fc; --blue-text: #0f4a96;
+    --purple: #6b3fc0; --purple-dim: #f0ebfc; --purple-text: #4a2a96;
+    --text: #1a2030; --text2: #4a5568; --text3: #8a96a8;
+    --border: #dde3ec; --radius: 12px; --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+  .nav { position: sticky; top: 0; z-index: 100; background: #fff; border-bottom: 1px solid var(--border); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .nav-tabs { display: flex; }
+  .nav-tab { flex: 1; padding: 14px 8px 12px; text-align: center; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; }
+  .nav-tab.active { color: var(--green); border-bottom-color: var(--green); }
+  .header { background: var(--green); padding: 24px 16px 20px; }
+  .header-eyebrow { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,0.75); margin-bottom: 4px; }
+  .header-title { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 700; color: #fff; line-height: 1.1; }
+  .header-sub { font-size: 13px; color: rgba(255,255,255,0.8); margin-top: 6px; }
+  .stat-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 16px; }
+  .stat-box { background: rgba(255,255,255,0.2); border-radius: 10px; padding: 10px 8px; text-align: center; }
+  .stat-n { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; color: #fff; }
+  .stat-l { font-size: 10px; color: rgba(255,255,255,0.75); margin-top: 1px; letter-spacing: .04em; }
+  .page { display: none; }
+  .page.active { display: block; }
+  .section { padding: 16px; }
+  .week-pills { display: flex; gap: 8px; margin-bottom: 16px; }
+  .week-pill { flex: 1; padding: 9px; text-align: center; border-radius: 8px; border: 1.5px solid var(--border); font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; color: var(--text2); cursor: pointer; transition: all .2s; background: #fff; }
+  .week-pill.active { background: var(--green-dim); border-color: var(--green); color: var(--green-text); }
+  .day-scroll { display: flex; gap: 8px; overflow-x: auto; padding: 0 16px 4px; scrollbar-width: none; margin-bottom: 16px; }
+  .day-scroll::-webkit-scrollbar { display: none; }
+  .day-chip { flex-shrink: 0; width: 58px; padding: 10px 4px; border-radius: 10px; border: 1.5px solid var(--border); text-align: center; cursor: pointer; transition: all .2s; background: #fff; box-shadow: var(--shadow); }
+  .day-chip.active { border-color: var(--green); background: var(--green-dim); }
+  .day-chip.rest-chip { background: var(--bg3); box-shadow: none; }
+  .chip-day { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: .06em; color: var(--text3); text-transform: uppercase; }
+  .chip-type { font-size: 11px; font-weight: 600; margin-top: 3px; }
+  .chip-type.gym { color: var(--green); }
+  .chip-type.walk { color: var(--blue); }
+  .chip-type.rest { color: var(--text3); }
+  .workout-header { margin: 0 16px 8px; }
+  .workout-title { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; color: var(--text); }
+  .workout-sub { font-size: 13px; color: var(--text2); margin-top: 2px; margin-bottom: 10px; }
+  .progress-label { font-size: 12px; color: var(--text3); display: flex; justify-content: space-between; margin-bottom: 5px; }
+  .progress-bar-wrap { background: var(--border); border-radius: 20px; height: 6px; overflow: hidden; margin-bottom: 4px; }
+  .progress-bar { height: 6px; background: var(--green); border-radius: 20px; transition: width .3s; }
+  .ex-list { padding: 0 16px; display: flex; flex-direction: column; gap: 8px; }
+  .ex-card { background: #fff; border-radius: var(--radius); border: 1.5px solid var(--border); overflow: hidden; cursor: pointer; transition: all .2s; box-shadow: var(--shadow); }
+  .ex-card.expanded { border-color: var(--green); }
+  .ex-card.done-card { opacity: 0.55; }
+  .ex-card.done-card .ex-name { text-decoration: line-through; color: var(--text3); }
+  .ex-top { display: flex; align-items: center; gap: 10px; padding: 12px 14px; }
+  .ex-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+  .ex-info { flex: 1; min-width: 0; }
+  .ex-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .ex-muscle { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .ex-badges { display: flex; gap: 5px; margin-top: 4px; flex-wrap: wrap; }
+  .badge { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 5px; }
+  .badge-sets { background: var(--bg3); color: var(--text2); }
+  .badge-weight { background: var(--green-dim); color: var(--green-text); }
+  .badge-rest { background: var(--bg3); color: var(--text3); }
+  .ex-tick { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border); background: #fff; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+  .ex-tick.ticked { background: var(--green); border-color: var(--green); }
+  .chevron { color: var(--text3); font-size: 11px; transition: transform .2s; flex-shrink: 0; margin-left: 4px; }
+  .ex-card.expanded .chevron { transform: rotate(180deg); }
+  .ex-detail { padding: 0 14px 14px; border-top: 1px solid var(--border); }
+  .ex-detail-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 12px 0 10px; }
+  .ex-stat { text-align: center; background: var(--bg3); border-radius: 8px; padding: 8px 4px; }
+  .ex-stat-n { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; color: var(--green); }
+  .ex-stat-l { font-size: 10px; color: var(--text3); margin-top: 1px; }
+  .ex-note { font-size: 13px; color: var(--text2); line-height: 1.55; padding: 10px 12px; background: var(--bg3); border-radius: 8px; margin-bottom: 10px; }
+  .tick-btn { width: 100%; padding: 11px; background: var(--green-dim); border: 1.5px solid var(--green); border-radius: 8px; color: var(--green-text); font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all .2s; }
+  .tick-btn.ticked { background: var(--green); color: #fff; border-color: var(--green); }
+  .walk-card { margin: 0 16px; background: var(--blue-dim); border: 1.5px solid #c0d8f5; border-radius: var(--radius); padding: 20px; text-align: center; }
+  .walk-dur { font-family: 'Barlow Condensed', sans-serif; font-size: 48px; font-weight: 700; color: var(--blue); line-height: 1; }
+  .walk-label { font-size: 12px; color: var(--blue-text); margin-top: 4px; letter-spacing: .06em; text-transform: uppercase; opacity: .7; }
+  .walk-tips { margin-top: 14px; text-align: left; display: flex; flex-direction: column; gap: 6px; }
+  .walk-tip { font-size: 13px; color: var(--blue-text); padding: 9px 12px; background: rgba(255,255,255,0.7); border-radius: 8px; border: 1px solid #c0d8f5; }
+  .rest-card { margin: 0 16px; background: #fff; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 36px 20px; text-align: center; box-shadow: var(--shadow); }
+  .rest-title { font-family: 'Barlow Condensed', sans-serif; font-size: 30px; font-weight: 700; color: var(--text2); }
+  .rest-sub { font-size: 13px; color: var(--text3); margin-top: 8px; line-height: 1.5; }
+  .tip-box { margin: 12px 16px 0; background: var(--green-dim); border: 1px solid #a8dfc8; border-radius: 10px; padding: 12px 14px; font-size: 13px; color: var(--green-text); line-height: 1.5; }
+  .amber-box { margin: 12px 16px 0; background: var(--amber-dim); border: 1px solid #f5d68a; border-radius: 10px; padding: 12px 14px; font-size: 13px; color: var(--amber-text); line-height: 1.5; }
+  .done-banner { margin: 12px 16px 0; background: var(--green); border-radius: 10px; padding: 16px; text-align: center; display: none; }
+  .done-banner.show { display: block; }
+  .done-banner-text { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; color: #fff; }
+  .done-banner-sub { font-size: 13px; color: rgba(255,255,255,0.85); margin-top: 3px; }
+  .filter-scroll { display: flex; gap: 8px; overflow-x: auto; padding: 0 16px 4px; scrollbar-width: none; margin-bottom: 16px; }
+  .filter-scroll::-webkit-scrollbar { display: none; }
+  .filter-chip { flex-shrink: 0; padding: 7px 14px; border-radius: 20px; border: 1.5px solid var(--border); font-size: 12px; font-weight: 600; color: var(--text2); cursor: pointer; transition: all .2s; background: #fff; }
+  .filter-chip.active { background: var(--green-dim); border-color: var(--green); color: var(--green-text); }
+  .machine-list { padding: 0 16px; display: flex; flex-direction: column; gap: 8px; }
+  .machine-card { background: #fff; border-radius: var(--radius); border: 1.5px solid var(--border); overflow: hidden; cursor: pointer; transition: border-color .2s; box-shadow: var(--shadow); }
+  .machine-card.expanded { border-color: var(--green); }
+  .mc-top { display: flex; align-items: center; gap: 12px; padding: 14px; }
+  .mc-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+  .mc-name { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
+  .mc-muscle { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .mc-detail { padding: 0 14px 14px; border-top: 1px solid var(--border); }
+  .mc-section { margin-top: 12px; }
+  .mc-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); margin-bottom: 5px; }
+  .mc-text { font-size: 13px; color: var(--text2); line-height: 1.55; }
+  .mc-weight { display: inline-block; margin-top: 6px; background: var(--green-dim); border: 1.5px solid #a8dfc8; border-radius: 8px; padding: 6px 16px; font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; color: var(--green-text); }
+  .mc-tip { margin-top: 10px; background: var(--purple-dim); border-radius: 8px; padding: 10px 12px; font-size: 12px; color: var(--purple-text); line-height: 1.5; font-style: italic; border: 1px solid #d4c5f5; }
+  .yt-btn { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 12px; background: #ff0000; border-radius: 8px; padding: 11px 16px; color: #fff; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; text-decoration: none; width: 100%; }
+  .yt-btn:active { opacity: 0.85; }
+  .yt-play { width: 22px; height: 16px; background: #fff; border-radius: 3px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .yt-tri { width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 9px solid #ff0000; margin-left: 1px; }
+  .weights-table { margin: 0 16px; background: #fff; border-radius: var(--radius); border: 1.5px solid var(--border); overflow: hidden; box-shadow: var(--shadow); }
+  .wt-hdr { display: grid; grid-template-columns: 1fr 80px 80px; background: var(--green); padding: 10px 14px; }
+  .wt-hdr-cell { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: rgba(255,255,255,0.9); text-align: center; }
+  .wt-hdr-cell:first-child { text-align: left; }
+  .wt-row { display: grid; grid-template-columns: 1fr 80px 80px; padding: 11px 14px; border-top: 1px solid var(--border); align-items: center; }
+  .wt-row:nth-child(even) { background: var(--bg3); }
+  .wt-name { font-size: 13px; color: var(--text); font-weight: 500; }
+  .wt-suggested { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; color: var(--green-text); text-align: center; }
+  .wt-actual { text-align: center; }
+  .wt-actual input { width: 64px; background: var(--bg3); border: 1.5px solid var(--border); border-radius: 8px; padding: 5px 6px; color: var(--text); font-size: 13px; text-align: center; font-family: 'Barlow', sans-serif; font-weight: 600; }
+  .wt-actual input:focus { outline: none; border-color: var(--green); background: var(--green-dim); }
+  .pb { padding-bottom: 32px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-eyebrow">Goodlife North Adelaide</div>
+  <div class="header-title">John's Gym Program</div>
+  <div class="header-sub">4-week machine-based weight loss plan</div>
+  <div class="stat-row">
+    <div class="stat-box"><div class="stat-n">3</div><div class="stat-l">Gym days</div></div>
+    <div class="stat-box"><div class="stat-n">3</div><div class="stat-l">Walk days</div></div>
+    <div class="stat-box"><div class="stat-n">4</div><div class="stat-l">Weeks</div></div>
+  </div>
+</div>
+
+<div class="nav">
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="showPage('workout',this)">Workouts</div>
+    <div class="nav-tab" onclick="showPage('machines',this)">Machines</div>
+    <div class="nav-tab" onclick="showPage('weights',this)">My Weights</div>
+  </div>
+</div>
+
+<div class="page active" id="page-workout">
+  <div class="section">
+    <div class="week-pills">
+      <div class="week-pill active" onclick="setWeek(0,this)">Weeks 1-2<br><span style="font-size:10px;font-weight:400">Foundation</span></div>
+      <div class="week-pill" onclick="setWeek(1,this)">Weeks 3-4<br><span style="font-size:10px;font-weight:400">Build</span></div>
+    </div>
+  </div>
+  <div class="day-scroll" id="day-scroll"></div>
+  <div class="workout-header" id="workout-header"></div>
+  <div id="workout-body"></div>
+  <div class="pb"></div>
+</div>
+
+<div class="page" id="page-machines">
+  <div class="section" style="padding-bottom:8px">
+    <div class="filter-scroll" id="machine-filters"></div>
+  </div>
+  <div class="machine-list" id="machine-list"></div>
+  <div class="pb"></div>
+</div>
+
+<div class="page" id="page-weights">
+  <div class="section">
+    <div class="tip-box">Tap any weight field to enter your actual weight. Saved on this device.</div>
+  </div>
+  <div class="weights-table" id="weights-table"></div>
+  <div class="amber-box" style="margin-bottom:0">Muscle burn is fine. Joint pain is not — drop the weight if you feel it in the joint.</div>
+  <div class="pb"></div>
+</div>
+
+<script>
+var weeks = [
+  {
+    label:"Weeks 1-2", sub:"Foundation — learn machines, build the habit",
+    days:[
+      {day:"Mon",type:"gym",label:"Upper body",dur:"45 min",exercises:[
+        {name:"Chest press",muscle:"Chest, shoulders, triceps",cat:"upper",icon:"CP",sets:3,reps:"12",rest:"60s",weight:"20-30kg",note:"Push horizontally. Last 2-3 reps should feel hard but doable."},
+        {name:"Seated row",muscle:"Back, biceps",cat:"upper",icon:"SR",sets:3,reps:"12",rest:"60s",weight:"25-35kg",note:"Pull elbows back as far as possible. Squeeze shoulder blades together."},
+        {name:"Shoulder press",muscle:"Shoulders, triceps",cat:"upper",icon:"SP",sets:3,reps:"12",rest:"60s",weight:"15-25kg",note:"Don't lock elbows at top. If lower back arches, weight is too heavy."},
+        {name:"Lat pulldown",muscle:"Back, biceps",cat:"upper",icon:"LP",sets:3,reps:"12",rest:"60s",weight:"25-35kg",note:"Wide grip. Pull bar to upper chest. Lean back slightly."},
+        {name:"Seated bike",muscle:"Cardio cooldown",cat:"cardio",icon:"SB",sets:1,reps:"10 min",rest:"-",weight:"-",note:"Easy cooldown. Keep legs moving at a comfortable pace."}
+      ]},
+      {day:"Tue",type:"walk",dur:"30 min",pace:"Comfortable pace — you should be able to hold a conversation. Great opportunity to take the dog."},
+      {day:"Wed",type:"gym",label:"Lower body",dur:"45 min",exercises:[
+        {name:"Leg press",muscle:"Quads, glutes, hamstrings",cat:"lower",icon:"LP",sets:3,reps:"12",rest:"60s",weight:"60-80kg",note:"Don't lock knees at top. Feet higher = more glutes. Feet lower = more quads."},
+        {name:"Leg curl",muscle:"Hamstrings",cat:"lower",icon:"LC",sets:3,reps:"12",rest:"60s",weight:"20-30kg",note:"Lie face down, curl heels toward backside. Squeeze at top."},
+        {name:"Leg extension",muscle:"Quadriceps",cat:"lower",icon:"LE",sets:3,reps:"12",rest:"60s",weight:"20-30kg",note:"Sit upright and extend legs forward. Control the return."},
+        {name:"Calf raise",muscle:"Calves",cat:"lower",icon:"CR",sets:3,reps:"15",rest:"45s",weight:"40-60kg",note:"Rise as high as possible. Lower heels below platform for full stretch."},
+        {name:"Seated bike",muscle:"Cardio cooldown",cat:"cardio",icon:"SB",sets:1,reps:"10 min",rest:"-",weight:"-",note:"Easy cooldown. Keep legs moving at a comfortable pace."}
+      ]},
+      {day:"Thu",type:"walk",dur:"30 min",pace:"Focus on posture — shoulders back, head up."},
+      {day:"Fri",type:"gym",label:"Full body + core",dur:"45 min",exercises:[
+        {name:"Chest press",muscle:"Chest",cat:"upper",icon:"CP",sets:2,reps:"12",rest:"60s",weight:"20-30kg",note:"Same as Monday. 2 sets today — full body day."},
+        {name:"Leg press",muscle:"Legs",cat:"lower",icon:"LP",sets:2,reps:"12",rest:"60s",weight:"60-80kg",note:"Same as Wednesday. 2 sets today."},
+        {name:"Seated row",muscle:"Back",cat:"upper",icon:"SR",sets:2,reps:"12",rest:"60s",weight:"25-35kg",note:"Same as Monday. 2 sets today."},
+        {name:"Ab crunch",muscle:"Core",cat:"core",icon:"AC",sets:3,reps:"15",rest:"45s",weight:"15-25kg",note:"Slow and controlled. Don't let weight slam back. Resist on the way up."},
+        {name:"Treadmill walk",muscle:"Cardio — incline 2-3",cat:"cardio",icon:"TM",sets:1,reps:"15 min",rest:"-",weight:"-",note:"Set incline to 2-3. Speed 4.5-5.5 km/h. Don't hold the rails."}
+      ]},
+      {day:"Sat",type:"walk",dur:"45 min",pace:"Slightly longer — explore a new route if possible. Enjoy it."},
+      {day:"Sun",type:"rest"}
+    ]
+  },
+  {
+    label:"Weeks 3-4", sub:"Build — increase weight 5-10%, add cardio",
+    days:[
+      {day:"Mon",type:"gym",label:"Upper body",dur:"45 min",exercises:[
+        {name:"Chest press",muscle:"Chest, shoulders, triceps",cat:"upper",icon:"CP",sets:3,reps:"10",rest:"75s",weight:"25-35kg",note:"Up 5-10% from week 1. Fewer reps, heavier weight."},
+        {name:"Seated row",muscle:"Back, biceps",cat:"upper",icon:"SR",sets:3,reps:"10",rest:"75s",weight:"30-40kg",note:"Up 5-10% from week 1."},
+        {name:"Shoulder press",muscle:"Shoulders",cat:"upper",icon:"SP",sets:3,reps:"10",rest:"75s",weight:"20-30kg",note:"Up 5-10% from week 1."},
+        {name:"Lat pulldown",muscle:"Back, biceps",cat:"upper",icon:"LP",sets:3,reps:"10",rest:"75s",weight:"30-40kg",note:"Up 5-10% from week 1."},
+        {name:"Treadmill walk",muscle:"Cardio — incline 2-3",cat:"cardio",icon:"TM",sets:1,reps:"15 min",rest:"-",weight:"-",note:"Treadmill replaces bike today. Incline 2-3."}
+      ]},
+      {day:"Tue",type:"walk",dur:"35 min",pace:"Pick up the pace — aim to feel slightly breathless."},
+      {day:"Wed",type:"gym",label:"Lower body",dur:"45 min",exercises:[
+        {name:"Leg press",muscle:"Quads, glutes, hamstrings",cat:"lower",icon:"LP",sets:3,reps:"10",rest:"75s",weight:"70-90kg",note:"Up from week 1. Legs handle more weight — push it."},
+        {name:"Leg curl",muscle:"Hamstrings",cat:"lower",icon:"LC",sets:3,reps:"10",rest:"75s",weight:"25-35kg",note:"Up 5kg from week 1."},
+        {name:"Leg extension",muscle:"Quadriceps",cat:"lower",icon:"LE",sets:3,reps:"10",rest:"75s",weight:"25-35kg",note:"Up 5kg from week 1."},
+        {name:"Calf raise",muscle:"Calves",cat:"lower",icon:"CR",sets:3,reps:"15",rest:"45s",weight:"40-60kg",note:"Same weight, focus on full range of motion."},
+        {name:"Treadmill walk",muscle:"Cardio — incline 3-4",cat:"cardio",icon:"TM",sets:1,reps:"15 min",rest:"-",weight:"-",note:"Incline 3-4 now — slightly harder than week 1."}
+      ]},
+      {day:"Thu",type:"walk",dur:"35 min",pace:"Good active recovery — take the dog if possible."},
+      {day:"Fri",type:"gym",label:"Full body + core",dur:"45 min",exercises:[
+        {name:"Chest press",muscle:"Chest",cat:"upper",icon:"CP",sets:3,reps:"10",rest:"75s",weight:"25-35kg",note:"3 sets now instead of 2. Heavier than Monday."},
+        {name:"Leg press",muscle:"Legs",cat:"lower",icon:"LP",sets:3,reps:"10",rest:"75s",weight:"70-90kg",note:"3 sets now instead of 2."},
+        {name:"Seated row",muscle:"Back",cat:"upper",icon:"SR",sets:3,reps:"10",rest:"75s",weight:"30-40kg",note:"3 sets now instead of 2."},
+        {name:"Ab crunch",muscle:"Core",cat:"core",icon:"AC",sets:3,reps:"15",rest:"45s",weight:"15-25kg",note:"Slow and controlled. Doesn't need to go heavier — focus on form."},
+        {name:"Treadmill walk",muscle:"Cardio — incline 3",cat:"cardio",icon:"TM",sets:1,reps:"20 min",rest:"-",weight:"-",note:"20 mins now — 5 mins longer than week 1."}
+      ]},
+      {day:"Sat",type:"walk",dur:"45 min",pace:"Weekend walk — enjoy it, no pressure on pace."},
+      {day:"Sun",type:"rest"}
+    ]
+  }
+];
+
+var machines = [
+  {name:"Chest press",muscle:"Chest, shoulders, triceps",cat:"upper",icon:"CP",weight:"20-30 kg",look:"A padded seat with two handles at chest height. You sit upright and push the handles forward away from your chest.",how:"Adjust seat so handles are at chest height. Back flat against pad. Push forward until arms almost straight, return slowly.",adjust:"Seat height — handles should line up with your chest when seated.",tip:"Look for a machine where you push horizontally. Usually near the free weights area. Goodlife labels them above the weight stack."},
+  {name:"Seated row",muscle:"Back, biceps",cat:"upper",icon:"SR",weight:"25-35 kg",look:"You sit facing the machine with a chest pad in front of you and pull two handles toward your torso. Cable runs horizontally.",how:"Sit facing pad, chest against it. Pull handles back toward lower chest, squeeze shoulder blades together, return slowly.",adjust:"Chest pad height so you're not hunching forward.",tip:"The chest pad distinguishes this from a lat pulldown. Think of pulling your elbows back as far as possible."},
+  {name:"Shoulder press",muscle:"Shoulders, triceps",cat:"upper",icon:"SP",weight:"15-25 kg",look:"Handles at shoulder height on each side of your head. You push upward. Has a back pad to lean against.",how:"Sit with back against pad. Push straight up until arms nearly straight, lower slowly.",adjust:"Seat so handles start at shoulder level.",tip:"Don't lock elbows at top. If lower back arches, the weight is too heavy."},
+  {name:"Lat pulldown",muscle:"Back, biceps",cat:"upper",icon:"LP",weight:"25-35 kg",look:"A wide bar overhead on a cable. You sit with thigh pads holding legs down and pull the bar to your chest.",how:"Sit with knees under pad. Wide grip on bar. Pull down to upper chest, lean back slightly, squeeze back. Return slowly.",adjust:"Thigh pad snug so you don't lift off the seat.",tip:"Wide overhead bar is the giveaway — only machine with a bar above your head. Usually near the cable section."},
+  {name:"Leg press",muscle:"Quads, glutes, hamstrings",cat:"lower",icon:"LP",weight:"60-80 kg",look:"A reclined seat where you push a large weighted platform with your feet. You're almost lying at 45 degrees.",how:"Sit back in reclined seat. Feet shoulder-width on platform. Release safety handles. Push until legs nearly straight, bend back slowly.",adjust:"Seat so knees are at roughly 90 degrees when feet are on platform.",tip:"Biggest machine in lower body area — hard to miss. Don't lock knees at top. Feet higher = more glutes, lower = more quads."},
+  {name:"Leg curl",muscle:"Hamstrings",cat:"lower",icon:"LC",weight:"20-30 kg",look:"You lie face down with a padded roller behind your ankles. You curl heels up toward your backside.",how:"Lie face down, ankle pad just above heels. Curl legs up as far as comfortable, squeeze at top, lower slowly.",adjust:"Ankle pad just above the heel, not on the calf.",tip:"Usually right next to the leg extension machine. The lying-down position distinguishes it."},
+  {name:"Leg extension",muscle:"Quadriceps",cat:"lower",icon:"LE",weight:"20-30 kg",look:"You sit upright with a padded roller on your shins. You extend legs straight in front of you.",how:"Sit with back against pad, roller on shins above feet. Extend legs out until straight, hold briefly, lower slowly.",adjust:"Seat so knees align with the machine pivot point — usually marked on the side.",tip:"Sit upright and kick forward. Usually paired with the leg curl machine."},
+  {name:"Calf raise",muscle:"Calves",cat:"lower",icon:"CR",weight:"40-60 kg",look:"Shoulder pads you stand under with toes on a raised platform. You rise up onto your toes against the weight.",how:"Shoulders under pads, toes on platform edge. Rise onto toes as high as possible, lower heels below platform for full stretch.",adjust:"Shoulder pad height so you're not cramped or overstretched.",tip:"Some Goodlife gyms have a seated calf raise instead. Either works the same muscle. Slow and controlled beats fast."},
+  {name:"Ab crunch",muscle:"Core, abdominals",cat:"core",icon:"AC",weight:"15-25 kg",look:"You sit with handles or pads at your chest. You crunch forward against resistance.",how:"Grip handles at chest. Crunch forward slowly, curling torso toward knees. Pause, return slowly — don't let weight slam back.",adjust:"Seat so the pivot point aligns with your midsection.",tip:"Slow beats heavy here. The return phase (going back up) is where most of the work happens."},
+  {name:"Treadmill",muscle:"Cardio, full body",cat:"cardio",icon:"TM",weight:"-",look:"Walking belt you stand on. Large console with speed and incline. Usually in a row along the wall or windows.",how:"Step on, press Quick Start. Speed 4.5-5.5 km/h. Set incline to 2-3 minimum.",adjust:"Speed 4.5-5.5 km/h is a good brisk walking pace. Always use incline 2 or more.",tip:"Incline walking burns significantly more calories than flat. Don't hold the handrails."},
+  {name:"Seated bike",muscle:"Cardio, legs",cat:"cardio",icon:"SB",weight:"-",look:"Recumbent (lean back, pedals in front) or upright bike. Easy on the joints. Good cooldown option.",how:"Adjust seat so leg is almost fully extended at bottom of pedal stroke. Moderate resistance. 70-80 RPM.",adjust:"Seat so knees have slight bend at bottom of pedal stroke — never fully locked.",tip:"Recumbent bike is easier on the lower back. Good cooldown after weights — low impact."}
+];
+
+var catColors = {
+  upper:{bg:"#f0ebfc",color:"#6b3fc0"},
+  lower:{bg:"#e0f5ee",color:"#0a6b49"},
+  core:{bg:"#fff4d6",color:"#c47a00"},
+  cardio:{bg:"#e6f0fc",color:"#1a65c0"}
+};
+
+var savedWeights = JSON.parse(localStorage.getItem("jgWeights") || "{}");
+var completed = JSON.parse(localStorage.getItem("jgCompleted") || "{}");
+var currentWeek = 0;
+var currentDay = 0;
+var expandedEx = null;
+var machineFilter = "all";
+var expandedMachine = null;
+
+function exKey(w, d, i) { return w + "-" + d + "-" + i; }
+
+function toggleDone(w, d, i, ev) {
+  ev.stopPropagation();
+  var k = exKey(w, d, i);
+  if (completed[k]) { delete completed[k]; } else { completed[k] = true; }
+  localStorage.setItem("jgCompleted", JSON.stringify(completed));
+  renderWorkout();
+}
+
+function showPage(p, el) {
+  var pages = document.querySelectorAll(".page");
+  for (var i = 0; i < pages.length; i++) { pages[i].classList.remove("active"); }
+  var tabs = document.querySelectorAll(".nav-tab");
+  for (var i = 0; i < tabs.length; i++) { tabs[i].classList.remove("active"); }
+  document.getElementById("page-" + p).classList.add("active");
+  el.classList.add("active");
+  if (p === "machines") renderMachines();
+  if (p === "weights") renderWeights();
+}
+
+function setWeek(w, el) {
+  currentWeek = w; currentDay = 0; expandedEx = null;
+  var pills = document.querySelectorAll(".week-pill");
+  for (var i = 0; i < pills.length; i++) { pills[i].classList.remove("active"); }
+  el.classList.add("active");
+  renderDays(); renderWorkout();
+}
+
+function setDay(i) {
+  currentDay = i; expandedEx = null;
+  var chips = document.querySelectorAll(".day-chip");
+  for (var j = 0; j < chips.length; j++) { chips[j].classList.toggle("active", j === i); }
+  renderWorkout();
+}
+
+function toggleEx(key) {
+  expandedEx = expandedEx === key ? null : key;
+  renderWorkout();
+}
+
+function renderDays() {
+  var days = weeks[currentWeek].days;
+  var html = "";
+  for (var i = 0; i < days.length; i++) {
+    var d = days[i];
+    var isActive = i === currentDay;
+    var isRest = d.type === "rest";
+    html += '<div class="day-chip' + (isRest ? " rest-chip" : "") + (isActive ? " active" : "") + '" onclick="setDay(' + i + ')">';
+    html += '<div class="chip-day">' + d.day + '</div>';
+    html += '<div class="chip-type ' + d.type + '">' + (d.type === "gym" ? "Gym" : d.type === "walk" ? "Walk" : "Rest") + '</div>';
+    html += '</div>';
+  }
+  document.getElementById("day-scroll").innerHTML = html;
+}
+
+function renderWorkout() {
+  var d = weeks[currentWeek].days[currentDay];
+  var hdr = document.getElementById("workout-header");
+  var body = document.getElementById("workout-body");
+
+  if (d.type === "rest") {
+    hdr.innerHTML = "";
+    body.innerHTML = '<div class="rest-card"><div class="rest-title">Rest day</div><div class="rest-sub">Recovery is where the gains happen.<br>Stay hydrated, sleep well.</div></div>';
+    return;
+  }
+  if (d.type === "walk") {
+    hdr.innerHTML = '<div class="workout-title">' + d.day + ' — Walk</div><div class="workout-sub">' + d.dur + '</div>';
+    body.innerHTML = '<div class="walk-card"><div class="walk-dur">' + d.dur + '</div><div class="walk-label">Midday walk</div><div class="walk-tips"><div class="walk-tip">Pace: ' + d.pace + '</div><div class="walk-tip">Bring water — Adelaide midday can be warm</div><div class="walk-tip">Great opportunity to take the dog</div></div></div>';
+    return;
+  }
+
+  var exes = d.exercises;
+  var doneCount = 0;
+  for (var i = 0; i < exes.length; i++) {
+    if (completed[exKey(currentWeek, currentDay, i)]) doneCount++;
+  }
+  var total = exes.length;
+  var pct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
+  var allDone = doneCount === total && total > 0;
+
+  var hdrHtml = '<div class="workout-title">' + d.day + ' — ' + d.label + '</div>';
+  hdrHtml += '<div class="workout-sub">' + d.dur + ' &nbsp;&middot;&nbsp; ' + weeks[currentWeek].sub + '</div>';
+  hdrHtml += '<div class="progress-label"><span>' + doneCount + ' of ' + total + ' done</span><span>' + pct + '%</span></div>';
+  hdrHtml += '<div class="progress-bar-wrap"><div class="progress-bar" style="width:' + pct + '%"></div></div>';
+  hdr.innerHTML = hdrHtml;
+
+  var listHtml = '<div class="ex-list">';
+  for (var i = 0; i < exes.length; i++) {
+    var e = exes[i];
+    var key = exKey(currentWeek, currentDay, i);
+    var isDone = !!completed[key];
+    var isExp = expandedEx === key;
+    var cc = catColors[e.cat] || catColors.upper;
+    var tickSvg = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="' + (isDone ? "#fff" : "#ccc") + '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+    listHtml += '<div class="ex-card' + (isExp ? " expanded" : "") + (isDone ? " done-card" : "") + '" onclick="toggleEx(\'' + key + '\')">';
+    listHtml += '<div class="ex-top">';
+    listHtml += '<div class="ex-icon" style="background:' + cc.bg + ';color:' + cc.color + '">' + e.icon + '</div>';
+    listHtml += '<div class="ex-info">';
+    listHtml += '<div class="ex-name">' + e.name + '</div>';
+    listHtml += '<div class="ex-muscle">' + e.muscle + '</div>';
+    listHtml += '<div class="ex-badges">';
+    listHtml += '<span class="badge badge-sets">' + e.sets + 'x' + e.reps + '</span>';
+    if (e.weight !== "-") listHtml += '<span class="badge badge-weight">' + e.weight + '</span>';
+    listHtml += '<span class="badge badge-rest">' + e.rest + '</span>';
+    listHtml += '</div></div>';
+    listHtml += '<div class="ex-tick' + (isDone ? " ticked" : "") + '" onclick="toggleDone(' + currentWeek + ',' + currentDay + ',' + i + ',event)">' + tickSvg + '</div>';
+    listHtml += '<div class="chevron">&#9660;</div>';
+    listHtml += '</div>';
+
+    if (isExp) {
+      listHtml += '<div class="ex-detail">';
+      listHtml += '<div class="ex-detail-grid">';
+      listHtml += '<div class="ex-stat"><div class="ex-stat-n">' + e.sets + '</div><div class="ex-stat-l">Sets</div></div>';
+      listHtml += '<div class="ex-stat"><div class="ex-stat-n">' + e.reps + '</div><div class="ex-stat-l">Reps</div></div>';
+      listHtml += '<div class="ex-stat"><div class="ex-stat-n">' + e.rest + '</div><div class="ex-stat-l">Rest</div></div>';
+      listHtml += '</div>';
+      if (e.weight !== "-") {
+        listHtml += '<div style="margin-bottom:10px"><div class="mc-label">Suggested weight</div><span class="mc-weight">' + e.weight + '</span></div>';
+      }
+      listHtml += '<div class="ex-note">' + e.note + '</div>';
+      listHtml += '<button class="tick-btn' + (isDone ? " ticked" : "") + '" onclick="toggleDone(' + currentWeek + ',' + currentDay + ',' + i + ',event)">';
+      listHtml += isDone ? "&#10003; Done!" : "Mark as done";
+      listHtml += '</button>';
+      listHtml += '</div>';
+    }
+    listHtml += '</div>';
+  }
+  listHtml += '</div>';
+  listHtml += '<div class="tip-box" style="margin-top:12px">Start light — find a weight where the last 2-3 reps feel hard but you can complete them with good form.</div>';
+  listHtml += '<div class="done-banner' + (allDone ? " show" : "") + '"><div class="done-banner-text">Session complete!</div><div class="done-banner-sub">Great work John — rest up and recover well.</div></div>';
+
+  body.innerHTML = listHtml;
+}
+
+function renderMachines() {
+  var filters = ["all","upper","lower","core","cardio"];
+  var labels = {all:"All",upper:"Upper body",lower:"Lower body",core:"Core",cardio:"Cardio"};
+  var fHtml = "";
+  for (var i = 0; i < filters.length; i++) {
+    fHtml += '<div class="filter-chip' + (machineFilter === filters[i] ? " active" : "") + '" onclick="setMachineFilter(\'' + filters[i] + '\')">' + labels[filters[i]] + '</div>';
+  }
+  document.getElementById("machine-filters").innerHTML = fHtml;
+
+  var filtered = machineFilter === "all" ? machines : machines.filter(function(m) { return m.cat === machineFilter; });
+  var mHtml = "";
+  for (var i = 0; i < filtered.length; i++) {
+    var m = filtered[i];
+    var cc = catColors[m.cat] || catColors.upper;
+    var isExp = expandedMachine === m.name;
+    mHtml += '<div class="machine-card' + (isExp ? " expanded" : "") + '" onclick="toggleMachine(\'' + m.name.replace(/'/g,"\\'"  ) + '\')">';
+    mHtml += '<div class="mc-top">';
+    mHtml += '<div class="mc-icon" style="background:' + cc.bg + ';color:' + cc.color + '">' + m.icon + '</div>';
+    mHtml += '<div style="flex:1"><div class="mc-name">' + m.name + '</div><div class="mc-muscle">' + m.muscle + '</div></div>';
+    if (m.weight !== "-") mHtml += '<span class="badge badge-weight" style="flex-shrink:0;margin-right:6px">' + m.weight + '</span>';
+    mHtml += '<div class="chevron">&#9660;</div>';
+    mHtml += '</div>';
+    if (isExp) {
+      mHtml += '<div class="mc-detail">';
+      mHtml += '<div class="mc-section"><div class="mc-label">What to look for</div><div class="mc-text">' + m.look + '</div></div>';
+      mHtml += '<div class="mc-section"><div class="mc-label">How to use it</div><div class="mc-text">' + m.how + '</div></div>';
+      mHtml += '<div class="mc-section"><div class="mc-label">What to adjust</div><div class="mc-text">' + m.adjust + '</div></div>';
+      if (m.weight !== "-") mHtml += '<div class="mc-section"><div class="mc-label">Suggested starting weight</div><span class="mc-weight">' + m.weight + '</span></div>';
+      mHtml += '<div class="mc-tip">' + m.tip + '</div>';
+      mHtml += '<a class="yt-btn" onclick="event.stopPropagation();openYouTube(\'' + m.name + ' machine\')"><div class="yt-play"><div class="yt-tri"></div></div>Watch on YouTube</a>';
+      mHtml += '</div>';
+    }
+    mHtml += '</div>';
+  }
+  document.getElementById("machine-list").innerHTML = mHtml;
+}
+
+function setMachineFilter(f) { machineFilter = f; expandedMachine = null; renderMachines(); }
+function toggleMachine(name) { expandedMachine = expandedMachine === name ? null : name; renderMachines(); }
+
+function openYouTube(name) {
+  var q = encodeURIComponent("how to use " + name + " for beginners");
+  window.open("https://www.youtube.com/results?search_query=" + q, "_blank");
+}
+
+function renderWeights() {
+  var wRows = machines.filter(function(m) { return m.weight !== "-"; });
+  var html = '<div class="wt-hdr"><div class="wt-hdr-cell">Machine</div><div class="wt-hdr-cell">Suggested</div><div class="wt-hdr-cell">My weight</div></div>';
+  for (var i = 0; i < wRows.length; i++) {
+    var m = wRows[i];
+    html += '<div class="wt-row">';
+    html += '<div class="wt-name">' + m.name + '</div>';
+    html += '<div class="wt-suggested">' + m.weight + '</div>';
+    html += '<div class="wt-actual"><input type="text" inputmode="numeric" placeholder="kg" value="' + (savedWeights[m.name] || "") + '" onchange="saveWeight(\'' + m.name + '\',this.value)"/></div>';
+    html += '</div>';
+  }
+  document.getElementById("weights-table").innerHTML = html;
+}
+
+function saveWeight(name, val) {
+  savedWeights[name] = val;
+  localStorage.setItem("jgWeights", JSON.stringify(savedWeights));
+}
+
+renderDays();
+renderWorkout();
+</script>
+</body>
+</html>
