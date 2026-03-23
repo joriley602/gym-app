@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#ffffff">
+<title>John's Gym App</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#f5f7fa;--bg2:#ffffff;--bg3:#eef1f5;
+    --green:#0f8a5f;--green-l:#12a872;--green-dim:#e0f5ee;--green-text:#0a6b49;
+    --amber:#c47a00;--amber-dim:#fff4d6;--amber-text:#7a4c00;
+    --blue:#1a65c0;--blue-dim:#e6f0fc;--blue-text:#0f4a96;
+    --purple:#6b3fc0;--purple-dim:#f0ebfc;--purple-text:#4a2a96;
+    --text:#1a2030;--text2:#4a5568;--text3:#8a96a8;
+    --border:#dde3ec;--radius:12px;--shadow:0 1px 3px rgba(0,0,0,0.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+  /* TOP NAV */
+  .nav{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,0.06);}
+  .nav-tabs{display:flex;}
+  .nav-tab{flex:1;padding:14px 4px 12px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;}
+  .nav-tab.active{color:var(--green);border-bottom-color:var(--green);}
+
+  /* HEADER */
+  .header{background:var(--green);padding:20px 16px 16px;}
+  .header-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,0.75);margin-bottom:4px;}
+  .header-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;color:#fff;line-height:1.1;}
+  .header-sub{font-size:12px;color:rgba(255,255,255,0.8);margin-top:4px;}
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px;}
+  .stat-box{background:rgba(255,255,255,0.2);border-radius:8px;padding:8px 4px;text-align:center;}
+  .stat-n{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:#fff;}
+  .stat-l{font-size:9px;color:rgba(255,255,255,0.75);margin-top:1px;letter-spacing:.03em;}
+
+  /* PAGES */
+  .page{display:none;}
+  .page.active{display:block;}
+
+  /* WEEK BANNER */
+  .week-banner{background:var(--green);padding:14px 16px 12px;margin-bottom:0;}
+  .week-banner.build{background:#1a65c0;}
+  .week-num{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.75);}
+  .week-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-top:2px;}
+  .week-sub{font-size:12px;color:rgba(255,255,255,0.8);margin-top:2px;}
+
+  /* DAY CHIPS */
+  .day-scroll{display:flex;gap:8px;overflow-x:auto;padding:12px 16px 4px;scrollbar-width:none;}
+  .day-scroll::-webkit-scrollbar{display:none;}
+  .day-chip{flex-shrink:0;width:56px;padding:9px 4px;border-radius:10px;border:1.5px solid var(--border);text-align:center;cursor:pointer;transition:all .2s;background:#fff;box-shadow:var(--shadow);}
+  .day-chip.active{border-color:var(--green);background:var(--green-dim);}
+  .day-chip.rest-chip{background:var(--bg3);box-shadow:none;}
+  .chip-day{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--text3);text-transform:uppercase;}
+  .chip-type{font-size:10px;font-weight:600;margin-top:3px;}
+  .chip-type.gym{color:var(--green);}
+  .chip-type.walk{color:var(--blue);}
+  .chip-type.rest{color:var(--text3);}
+  .chip-logged{font-size:9px;color:var(--green);margin-top:2px;font-weight:600;}
+
+  /* WORKOUT HEADER */
+  .workout-header{margin:12px 16px 8px;}
+  .workout-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--text);}
+  .workout-sub{font-size:12px;color:var(--text2);margin-top:2px;margin-bottom:8px;}
+  .progress-label{font-size:11px;color:var(--text3);display:flex;justify-content:space-between;margin-bottom:4px;}
+  .progress-bar-wrap{background:var(--border);border-radius:20px;height:5px;overflow:hidden;}
+  .progress-bar{height:5px;background:var(--green);border-radius:20px;transition:width .3s;}
+
+  /* EXERCISE CARDS */
+  .ex-list{padding:10px 16px 0;display:flex;flex-direction:column;gap:8px;}
+  .ex-card{background:#fff;border-radius:var(--radius);border:1.5px solid var(--border);overflow:hidden;cursor:pointer;transition:all .2s;box-shadow:var(--shadow);}
+  .ex-card.expanded{border-color:var(--green);}
+  .ex-card.done-card{opacity:0.55;}
+  .ex-card.done-card .ex-name{text-decoration:line-through;color:var(--text3);}
+  .ex-top{display:flex;align-items:center;gap:10px;padding:11px 12px;}
+  .ex-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;flex-shrink:0;}
+  .ex-info{flex:1;min-width:0;}
+  .ex-name{font-size:13px;font-weight:600;color:var(--text);}
+  .ex-muscle{font-size:10px;color:var(--text3);margin-top:1px;}
+  .ex-badges{display:flex;gap:4px;margin-top:3px;flex-wrap:wrap;}
+  .badge{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;}
+  .badge-sets{background:var(--bg3);color:var(--text2);}
+  .badge-weight{background:var(--green-dim);color:var(--green-text);}
+  .badge-rest{background:var(--bg3);color:var(--text3);}
+  .badge-logged{background:var(--green);color:#fff;}
+  .ex-tick{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);background:#fff;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+  .ex-tick.ticked{background:var(--green);border-color:var(--green);}
+  .chevron{color:var(--text3);font-size:10px;transition:transform .2s;flex-shrink:0;margin-left:3px;}
+  .ex-card.expanded .chevron{transform:rotate(180deg);}
+
+  /* EXERCISE DETAIL */
+  .ex-detail{padding:0 12px 12px;border-top:1px solid var(--border);}
+  .ex-detail-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:10px 0 8px;}
+  .ex-stat{text-align:center;background:var(--bg3);border-radius:8px;padding:7px 4px;}
+  .ex-stat-n{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--green);}
+  .ex-stat-l{font-size:9px;color:var(--text3);margin-top:1px;}
+  .ex-note{font-size:12px;color:var(--text2);line-height:1.5;padding:9px 10px;background:var(--bg3);border-radius:8px;margin-bottom:10px;}
+
+  /* LOG FIELDS */
+  .log-section{margin-bottom:10px;}
+  .log-title{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:7px;}
+  .log-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+  .log-field{display:flex;flex-direction:column;gap:3px;}
+  .log-label{font-size:10px;color:var(--text3);font-weight:600;text-align:center;}
+  .log-input{background:var(--bg3);border:1.5px solid var(--border);border-radius:8px;padding:9px 4px;color:var(--text);font-size:16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;width:100%;transition:border-color .2s;}
+  .log-input:focus{outline:none;border-color:var(--green);background:var(--green-dim);}
+  .log-input::placeholder{color:var(--text3);font-weight:400;font-size:12px;}
+  .log-suggest{font-size:9px;color:var(--green-text);text-align:center;margin-top:1px;}
+  .tick-btn{width:100%;padding:10px;background:var(--green-dim);border:1.5px solid var(--green);border-radius:8px;color:var(--green-text);font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;margin-top:8px;}
+  .tick-btn.ticked{background:var(--green);color:#fff;border-color:var(--green);}
+
+  /* WALK / REST */
+  .walk-card{margin:12px 16px 0;background:var(--blue-dim);border:1.5px solid #c0d8f5;border-radius:var(--radius);padding:18px;text-align:center;}
+  .walk-dur{font-family:'Barlow Condensed',sans-serif;font-size:44px;font-weight:700;color:var(--blue);line-height:1;}
+  .walk-label{font-size:11px;color:var(--blue-text);margin-top:3px;letter-spacing:.06em;text-transform:uppercase;opacity:.7;}
+  .walk-tips{margin-top:12px;text-align:left;display:flex;flex-direction:column;gap:5px;}
+  .walk-tip{font-size:12px;color:var(--blue-text);padding:8px 10px;background:rgba(255,255,255,0.7);border-radius:8px;border:1px solid #c0d8f5;}
+  .rest-card{margin:12px 16px 0;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);padding:32px 16px;text-align:center;box-shadow:var(--shadow);}
+  .rest-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;color:var(--text2);}
+  .rest-sub{font-size:12px;color:var(--text3);margin-top:6px;line-height:1.5;}
+
+  /* BOXES */
+  .tip-box{margin:10px 16px 0;background:var(--green-dim);border:1px solid #a8dfc8;border-radius:10px;padding:10px 12px;font-size:12px;color:var(--green-text);line-height:1.5;}
+  .done-banner{margin:10px 16px 0;background:var(--green);border-radius:10px;padding:14px;text-align:center;display:none;}
+  .done-banner.show{display:block;}
+  .done-banner-text{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:#fff;}
+  .done-banner-sub{font-size:12px;color:rgba(255,255,255,0.85);margin-top:2px;}
+
+  /* MACHINES PAGE */
+  .filter-scroll{display:flex;gap:8px;overflow-x:auto;padding:12px 16px 4px;scrollbar-width:none;}
+  .filter-scroll::-webkit-scrollbar{display:none;}
+  .filter-chip{flex-shrink:0;padding:6px 12px;border-radius:20px;border:1.5px solid var(--border);font-size:11px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .2s;background:#fff;}
+  .filter-chip.active{background:var(--green-dim);border-color:var(--green);color:var(--green-text);}
+  .machine-list{padding:4px 16px 0;display:flex;flex-direction:column;gap:8px;}
+  .machine-card{background:#fff;border-radius:var(--radius);border:1.5px solid var(--border);overflow:hidden;cursor:pointer;transition:border-color .2s;box-shadow:var(--shadow);}
+  .machine-card.expanded{border-color:var(--green);}
+  .mc-top{display:flex;align-items:center;gap:10px;padding:12px;}
+  .mc-icon{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;flex-shrink:0;}
+  .mc-name{font-size:13px;font-weight:600;color:var(--text);flex:1;}
+  .mc-muscle{font-size:10px;color:var(--text3);margin-top:2px;}
+  .mc-detail{padding:0 12px 12px;border-top:1px solid var(--border);}
+  .mc-section{margin-top:10px;}
+  .mc-label{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:4px;}
+  .mc-text{font-size:12px;color:var(--text2);line-height:1.55;}
+  .mc-weight{display:inline-block;margin-top:5px;background:var(--green-dim);border:1.5px solid #a8dfc8;border-radius:8px;padding:5px 14px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--green-text);}
+  .mc-tip{margin-top:8px;background:var(--purple-dim);border-radius:8px;padding:8px 10px;font-size:11px;color:var(--purple-text);line-height:1.5;font-style:italic;border:1px solid #d4c5f5;}
+  .yt-btn{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;background:#ff0000;border-radius:8px;padding:10px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;width:100%;}
+  .yt-play{width:20px;height:14px;background:#fff;border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .yt-tri{width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:8px solid #ff0000;margin-left:1px;}
+  .pb{padding-bottom:32px;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-eyebrow">Goodlife North Adelaide</div>
+  <div class="header-title">John's Gym Program</div>
+  <div class="header-sub">4-week machine-based weight loss plan</div>
+  <div class="stat-row">
+    <div class="stat-box"><div class="stat-n">3</div><div class="stat-l">Gym days</div></div>
+    <div class="stat-box"><div class="stat-n">3</div><div class="stat-l">Walk days</div></div>
+    <div class="stat-box"><div class="stat-n">45</div><div class="stat-l">Mins/session</div></div>
+    <div class="stat-box"><div class="stat-n">4</div><div class="stat-l">Weeks</div></div>
+  </div>
+</div>
+
+<div class="nav">
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="showPage('w1',this)">Week 1</div>
+    <div class="nav-tab" onclick="showPage('w2',this)">Week 2</div>
+    <div class="nav-tab" onclick="showPage('w3',this)">Week 3</div>
+    <div class="nav-tab" onclick="showPage('w4',this)">Week 4</div>
+    <div class="nav-tab" onclick="showPage('machines',this)">Machines</div>
+  </div>
+</div>
+
+<div class="page active" id="page-w1"></div>
+<div class="page" id="page-w2"></div>
+<div class="page" id="page-w3"></div>
+<div class="page" id="page-w4"></div>
+<div class="page" id="page-machines">
+  <div class="filter-scroll" id="machine-filters"></div>
+  <div class="machine-list" id="machine-list"></div>
+  <div class="pb"></div>
+</div>
+
+<script>
+var allWeeks = [
+  {
+    num:1, phase:"Foundation", sub:"Learn the machines — start lighter than you think",
+    days:[
+      {day:"Mon",type:"gym",label:"Upper Body",dur:"45 min",exercises:[
+        {name:"Chest press",muscle:"Chest, shoulders, triceps",cat:"upper",icon:"CP",sets:3,reps:"10",rest:"60s",weight:"20-30kg",note:"Push horizontally. Last 2-3 reps should feel hard but doable."},
+        {name:"Seated row",muscle:"Back, biceps",cat:"upper",icon:"SR",sets:3,reps:"10",rest:"60s",weight:"25-35kg",note:"Pull elbows back as far as possible. Squeeze shoulder blades together."},
+        {name:"Rear delt fly",muscle:"Rear shoulders, upper back",cat:"upper",icon:"RD",sets:3,reps:"10",rest:"60s",weight:"10-20kg",note:"Sit facing the machine, chest against pad. Pull both handles back and outward in an arc. Squeeze shoulder blades together at the end."},
+        {name:"Lat pulldown",muscle:"Back, biceps",cat:"upper",icon:"LP",sets:3,reps:"10",rest:"60s",weight:"25-35kg",note:"Wide grip. Pull bar to upper chest. Lean back slightly."},
+        {name:"Seated bike",muscle:"Cardio cooldown",cat:"cardio",icon:"SB",sets:1,reps:"10 min",rest:"-",weight:"-",note:"Easy cooldown. Keep legs moving at a comfortable pace."}
+      ]},
+      {day:"Tue",type:"walk",dur:"30 min",pace:"Comfortable pace — you should be able to hold a conversation. Great opportunity to take the dog."},
+      {day:"Wed",type:"gym",label:"Lower Body",dur:"45 min",exercises:[
+        {name:"Leg press",muscle:"Quads, glutes, hamstrings",cat:"lower",icon:"LP",sets:3,reps:"10",rest:"60s",weight:"60-80kg",note:"Don't lock knees at top. Feet higher = more glutes. Feet lower = more quads."},
+        {name:"Leg curl",muscle:"Hamstrings",cat:"lower",icon:"LC",sets:3,reps:"10",rest:"60s",weight:"20-30kg",note:"Lie face down, curl heels toward backside. Squeeze at top."},
+        {name:"Leg extension",muscle:"Quadriceps",cat:"lower",icon:"LE",sets:3,reps:"10",rest:"60s",weight:"20-30kg",note:"Sit upright and extend legs forward. Control the return."},
+        {name:"Calf raise",muscle:"Calves",cat:"lower",icon:"CR",sets:3,reps:"15",rest:"45s",weight:"40-60kg",note:"Rise as high as possible. Lower heels below platform for full stretch."},
+        {name:"Seated bike",muscle:"Cardio cooldown",cat:"cardio",icon:"SB",sets:1,reps:"10 min",rest:"-",weight:"-",note:"Easy cooldown. Keep legs moving at a comfortable pace."}
+      ]},
+      {day:"Thu",type:"walk",dur:"30 min",pace:"Focus on posture — shoulders back, head up."},
+      {day:"Fri",type:"gym",label:"Full Body + Core",dur:"45 min",exercises:[
+        {name:"Chest press",muscle:"Chest",cat:"upper",icon:"CP",sets:2,reps:"10",rest:"60s",weight:"20-30kg",note:"Same as Monday. 2 sets today — full body day."},
+        {name:"Leg press",muscle:"Legs",cat:"lower",icon:"LP",sets:2,reps:"10",rest:"60s",weight:"60-80kg",note:"Same as Wednesday. 2 sets today."},
+        {name:"Seated row",muscle:"Back",cat:"upper",icon:"SR",sets:2,reps:"10",rest:"60s",weight:"25-35kg",note:"Same as Monday. 2 sets today."},
+        {name:"Ab crunch",muscle:"Core",cat:"core",icon:"AC",sets:3,reps:"15",rest:"45s",weight:"15-25kg",note:"Slow and controlled. Don't let weight slam back. Resist on the way up."},
+        {name:"Treadmill walk",muscle:"Cardio — incline 2-3",cat:"cardio",icon:"TM",sets:1,reps:"15 min",rest:"-",weight:"-",note:"Set incline to 2-3. Speed 4.5-5.5 km/h. Don't hold the rails."}
+      ]},
+      {day:"Sat",type:"walk",dur:"45 min",pace:"Slightly longer — explore a new route if possible. Enjoy it."},
+      {day:"Sun",type:"rest"}
+    ]
+  },
+  {
+    num:2, phase:"Foundation", sub:"Repeat week 1 — focus on form, record your weights",
+    days:[
+      {day:"Mon",type:"gym",label:"Upper Body",dur:"45 min",exercises:[
+        {name:"Chest press",muscle:"Chest, shoulders, triceps",cat:"upper",icon:"CP",sets:3,reps:"10",rest:"60s",weight:"20-30kg",note:"Focus on form this week. Try to match or beat your week 1 weights."},
+        {name:"Seated row",muscle:"Back, biceps",cat:"upper",icon:"SR",sets:3,reps:"10",rest:"60s",weight:"25-35kg",note:"Machines should feel familiar now. Slow and controlled."},
+        {name:"Rear delt fly",muscle:"Rear shoulders, upper back",cat:"upper",icon:"RD",sets:3,reps:"10",rest:"60s",weight:"10-20kg",note:"Focus on controlling the weight back to starting position. Keep chest against pad throughout."},
+        {name:"Lat pulldown",muscle:"Back, biceps",cat:"upper",icon:"LP",sets:3,reps:"10",rest:"60s",weight:"25-35kg",note:"Pull bar to upper chest. Squeeze back at the bottom."},
+        {name:"Seated bike",muscle:"Cardio cooldown",cat:"cardio",icon:"SB",sets:1,reps:"10 min",rest:"-",weight:"-",note:"Easy cooldown. Keep legs moving at a comfortable pace."}
+      ]},
+      {day:"Tue",type:"walk",dur:"30 min",pace:"Same route as last week — notice if it feels easier already."},
+      {day:"Wed",type:"gym",label:"Lower Body",dur:"45 min",exercises:[
+        {name:"Leg press",muscle:"Quads, glutes, hamstrings",cat:"lower",icon:"LP",sets:3,reps:"10",rest:"60s",weight:"60-80kg",note:"Try to match or beat your week 1 weights."},
+        {name:"Leg curl",muscle:"Hamstrings",cat:"lower",icon:"LC",sets:3,reps:"10",rest:"60s",weight:"20-30kg",note:"Controlled movement both ways — don't let it snap back."},
+        {name:"Leg extension",muscle:"Quadriceps",cat:"lower",icon:"LE",sets:3,reps:"10",rest:"60s",weight:"20-30kg",note:"Sit upright and extend legs forward. Control the return."},
+        {name:"Calf raise",muscle:"Calves",cat:"lower",icon:"CR",sets:3,reps:"15",rest:"45s",weight:"40-60kg",note:"Full range of motion — lower heels below platform each rep."},
+        {name:"Seated bike",muscle:"Cardio cooldown",cat:"cardio",icon:"SB",sets:1,reps:"10 min",rest:"-",weight:"-",note:"Easy cooldown. Keep legs moving at a comfortable pace."}
+      ]},
+      {day:"Thu",type:"walk",dur:"30 min",pace:"Try to walk slightly faster than last week."},
+      {day:"Fri",type:"gym",label:"Full Body + Core",dur:"45 min",exercises:[
+        {name:"Chest press",muscle:"Chest",cat:"upper",icon:"CP",sets:2,reps:"10",rest:"60s",weight:"20-30kg",note:"2 sets today. Focus on a full range of motion."},
+        {name:"Leg press",muscle:"Legs",cat:"lower",icon:"LP",sets:2,reps:"10",rest:"60s",weight:"60-80kg",note:"2 sets today. Push through the full movement."},
+        {name:"Seated row",muscle:"Back",cat:"upper",icon:"SR",sets:2,reps:"10",rest:"60s",weight:"25-35kg",note:"2 sets today. Squeeze shoulder blades at the end of each rep."},
+        {name:"Ab crunch",muscle:"Core",cat:"core",icon:"AC",sets:3,reps:"15",rest:"45s",weight:"15-25kg",note:"Slow is better than heavy here. Resist on the way back up."},
+        {name:"Treadmill walk",muscle:"Cardio — incline 2-3",cat:"cardio",icon:"TM",sets:1,reps:"15 min",rest:"-",weight:"-",note:"Set incline to 2-3. Speed 4.5-5.5 km/h. Don't hold the rails."}
+      ]},
+      {day:"Sat",type:"walk",dur:"45 min",pace:"Weekend walk — you have completed 2 weeks if you get this done!"},
+      {day:"Sun",type:"rest"}
+    ]
+  },
+  {
+    num:3, phase:"Build", sub:"Increase weight 5-10% from week 1, add cardio",
+    days:[
+      {day:"Mon",type:"gym",label:"Upper Body",dur:"45 min",exercises:[
+        {name:"Chest press",muscle:"Chest, shoulders, triceps",cat:"upper",icon:"CP",sets:3,reps:"10",rest:"75s",weight:"25-35kg",note:"Up 5-10% from week 1. Fewer reps, heavier weight, longer rest."},
+        {name:"Seated row",muscle:"Back, biceps",cat:"upper",icon:"SR",sets:3,reps:"10",rest:"75s",weight:"30-40kg",note:"Up 5-10% from week 1."},
+        {name:"Rear delt fly",muscle:"Rear shoulders, upper back",cat:"upper",icon:"RD",sets:3,reps:"10",rest:"75s",weight:"12-22kg",note:"Up 5-10% from week 1. Slow and controlled — don't let the weight swing."},
+        {name:"Lat pulldown",muscle:"Back, biceps",cat:"upper",icon:"LP",sets:3,reps:"10",rest:"75s",weight:"30-40kg",note:"Up 5-10% from week 1."},
+        {name:"Treadmill walk",muscle:"Cardio — incline 2-3",cat:"cardio",icon:"TM",sets:1,reps:"15 min",rest:"-",weight:"-",note:"Treadmill replaces bike this week. Incline 2-3."}
+      ]},
+      {day:"Tue",type:"walk",dur:"35 min",pace:"Pick up the pace — aim to feel slightly breathless."},
+      {day:"Wed",type:"gym",label:"Lower Body",dur:"45 min",exercises:[
+        {name:"Leg press",muscle:"Quads, glutes, hamstrings",cat:"lower",icon:"LP",sets:3,reps:"10",rest:"75s",weight:"70-90kg",note:"Up from week 1. Legs handle more weight — push it."},
+        {name:"Leg curl",muscle:"Hamstrings",cat:"lower",icon:"LC",sets:3,reps:"10",rest:"75s",weight:"25-35kg",note:"Up 5kg from week 1."},
+        {name:"Leg extension",muscle:"Quadriceps",cat:"lower",icon:"LE",sets:3,reps:"10",rest:"75s",weight:"25-35kg",note:"Up 5kg from week 1."},
+        {name:"Calf raise",muscle:"Calves",cat:"lower",icon:"CR",sets:3,reps:"15",rest:"45s",weight:"40-60kg",note:"Same weight, focus on full range of motion."},
+        {name:"Treadmill walk",muscle:"Cardio — incline 3-4",cat:"cardio",icon:"TM",sets:1,reps:"15 min",rest:"-",weight:"-",note:"Incline 3-4 now — slightly harder than week 1."}
+      ]},
+      {day:"Thu",type:"walk",dur:"35 min",pace:"Good active recovery — take the dog if possible."},
+      {day:"Fri",type:"gym",label:"Full Body + Core",dur:"45 min",exercises:[
+        {name:"Chest press",muscle:"Chest",cat:"upper",icon:"CP",sets:3,reps:"10",rest:"75s",weight:"25-35kg",note:"3 sets now instead of 2. Heavier than Monday."},
+        {name:"Leg press",muscle:"Legs",cat:"lower",icon:"LP",sets:3,reps:"10",rest:"75s",weight:"70-90kg",note:"3 sets now instead of 2."},
+        {name:"Seated row",muscle:"Back",cat:"upper",icon:"SR",sets:3,reps:"10",rest:"75s",weight:"30-40kg",note:"3 sets now instead of 2."},
+        {name:"Ab crunch",muscle:"Core",cat:"core",icon:"AC",sets:3,reps:"15",rest:"45s",weight:"15-25kg",note:"Slow and controlled. Doesn't need to go heavier — focus on form."},
+        {name:"Treadmill walk",muscle:"Cardio — incline 3",cat:"cardio",icon:"TM",sets:1,reps:"20 min",rest:"-",weight:"-",note:"20 mins now — 5 mins longer than week 1."}
+      ]},
+      {day:"Sat",type:"walk",dur:"45 min",pace:"Weekend walk — you should notice your fitness improving from week 1."},
+      {day:"Sun",type:"rest"}
+    ]
+  },
+  {
+    num:4, phase:"Build", sub:"Push harder — aim to beat your week 3 weights",
+    days:[
+      {day:"Mon",type:"gym",label:"Upper Body",dur:"45 min",exercises:[
+        {name:"Chest press",muscle:"Chest, shoulders, triceps",cat:"upper",icon:"CP",sets:3,reps:"10",rest:"75s",weight:"25-40kg",note:"Try to go heavier than week 3. Best effort today."},
+        {name:"Seated row",muscle:"Back, biceps",cat:"upper",icon:"SR",sets:3,reps:"10",rest:"75s",weight:"30-45kg",note:"Try to go heavier than week 3."},
+        {name:"Rear delt fly",muscle:"Rear shoulders, upper back",cat:"upper",icon:"RD",sets:3,reps:"10",rest:"75s",weight:"12-25kg",note:"Best effort — try to beat your week 3 weight."},
+        {name:"Lat pulldown",muscle:"Back, biceps",cat:"upper",icon:"LP",sets:3,reps:"10",rest:"75s",weight:"30-45kg",note:"Try to go heavier than week 3."},
+        {name:"Treadmill walk",muscle:"Cardio — incline 3",cat:"cardio",icon:"TM",sets:1,reps:"20 min",rest:"-",weight:"-",note:"20 mins at incline 3. Strong finish."}
+      ]},
+      {day:"Tue",type:"walk",dur:"40 min",pace:"Longer walk this week — push the distance or pace."},
+      {day:"Wed",type:"gym",label:"Lower Body",dur:"45 min",exercises:[
+        {name:"Leg press",muscle:"Quads, glutes, hamstrings",cat:"lower",icon:"LP",sets:3,reps:"10",rest:"75s",weight:"80-100kg",note:"Best effort — beat your week 3 weight."},
+        {name:"Leg curl",muscle:"Hamstrings",cat:"lower",icon:"LC",sets:3,reps:"10",rest:"75s",weight:"25-40kg",note:"Try to go heavier than week 3."},
+        {name:"Leg extension",muscle:"Quadriceps",cat:"lower",icon:"LE",sets:3,reps:"10",rest:"75s",weight:"25-40kg",note:"Try to go heavier than week 3."},
+        {name:"Calf raise",muscle:"Calves",cat:"lower",icon:"CR",sets:3,reps:"15",rest:"45s",weight:"50-70kg",note:"Try to go heavier than week 3."},
+        {name:"Treadmill walk",muscle:"Cardio — incline 4",cat:"cardio",icon:"TM",sets:1,reps:"20 min",rest:"-",weight:"-",note:"Incline 4 — hardest cardio of the program."}
+      ]},
+      {day:"Thu",type:"walk",dur:"40 min",pace:"Strong finish to the program — make this one count."},
+      {day:"Fri",type:"gym",label:"Full Body + Core",dur:"45 min",exercises:[
+        {name:"Chest press",muscle:"Chest",cat:"upper",icon:"CP",sets:3,reps:"10",rest:"75s",weight:"25-40kg",note:"Final gym session — give it everything!"},
+        {name:"Leg press",muscle:"Legs",cat:"lower",icon:"LP",sets:3,reps:"10",rest:"75s",weight:"80-100kg",note:"Best effort today."},
+        {name:"Seated row",muscle:"Back",cat:"upper",icon:"SR",sets:3,reps:"10",rest:"75s",weight:"30-45kg",note:"Best effort today."},
+        {name:"Ab crunch",muscle:"Core",cat:"core",icon:"AC",sets:3,reps:"15",rest:"45s",weight:"15-25kg",note:"Slow and controlled. Finish strong."},
+        {name:"Treadmill walk",muscle:"Cardio — incline 3-4",cat:"cardio",icon:"TM",sets:1,reps:"20 min",rest:"-",weight:"-",note:"Final cardio of the program — you've got this!"}
+      ]},
+      {day:"Sat",type:"walk",dur:"45 min",pace:"Final walk of the program — well done on completing 4 weeks!"},
+      {day:"Sun",type:"rest"}
+    ]
+  }
+];
+
+var machines=[
+  {name:"Chest press",muscle:"Chest, shoulders, triceps",cat:"upper",icon:"CP",weight:"20-30 kg",look:"A padded seat with two handles at chest height. You sit upright and push the handles forward away from your chest.",how:"Adjust seat so handles are at chest height. Back flat against pad. Push forward until arms almost straight, return slowly.",adjust:"Seat height — handles should line up with your chest when seated.",tip:"Look for a machine where you push horizontally. Usually near the free weights area. Goodlife labels them above the weight stack."},
+  {name:"Seated row",muscle:"Back, biceps",cat:"upper",icon:"SR",weight:"25-35 kg",look:"You sit facing the machine with a chest pad in front of you and pull two handles toward your torso. Cable runs horizontally.",how:"Sit facing pad, chest against it. Pull handles back toward lower chest, squeeze shoulder blades together, return slowly.",adjust:"Chest pad height so you're not hunching forward.",tip:"The chest pad distinguishes this from a lat pulldown. Think of pulling your elbows back as far as possible."},
+  {name:"Shoulder press",muscle:"Shoulders, triceps",cat:"upper",icon:"SP",weight:"15-25 kg",look:"Handles at shoulder height on each side of your head. You push upward. Has a back pad to lean against.",how:"Sit with back against pad. Push straight up until arms nearly straight, lower slowly.",adjust:"Seat so handles start at shoulder level.",tip:"Don't lock elbows at top. If lower back arches, the weight is too heavy."},
+  {name:"Lat pulldown",muscle:"Back, biceps",cat:"upper",icon:"LP",weight:"25-35 kg",look:"A wide bar overhead on a cable. You sit with thigh pads holding legs down and pull the bar to your chest.",how:"Sit with knees under pad. Wide grip on bar. Pull down to upper chest, lean back slightly, squeeze back. Return slowly.",adjust:"Thigh pad snug so you don't lift off the seat.",tip:"Wide overhead bar is the giveaway — only machine with a bar above your head. Usually near the cable section."},
+  {name:"Leg press",muscle:"Quads, glutes, hamstrings",cat:"lower",icon:"LP",weight:"60-80 kg",look:"A reclined seat where you push a large weighted platform with your feet. You're almost lying at 45 degrees.",how:"Sit back in reclined seat. Feet shoulder-width on platform. Release safety handles. Push until legs nearly straight, bend back slowly.",adjust:"Seat so knees are at roughly 90 degrees when feet are on platform.",tip:"Biggest machine in lower body area — hard to miss. Don't lock knees at top. Feet higher = more glutes, lower = more quads."},
+  {name:"Leg curl",muscle:"Hamstrings",cat:"lower",icon:"LC",weight:"20-30 kg",look:"You lie face down with a padded roller behind your ankles. You curl heels up toward your backside.",how:"Lie face down, ankle pad just above heels. Curl legs up as far as comfortable, squeeze at top, lower slowly.",adjust:"Ankle pad just above the heel, not on the calf.",tip:"Usually right next to the leg extension machine. The lying-down position distinguishes it."},
+  {name:"Leg extension",muscle:"Quadriceps",cat:"lower",icon:"LE",weight:"20-30 kg",look:"You sit upright with a padded roller on your shins. You extend legs straight in front of you.",how:"Sit with back against pad, roller on shins above feet. Extend legs out until straight, hold briefly, lower slowly.",adjust:"Seat so knees align with the machine pivot point — usually marked on the side.",tip:"Sit upright and kick forward. Usually paired with the leg curl machine."},
+  {name:"Calf raise",muscle:"Calves",cat:"lower",icon:"CR",weight:"40-60 kg",look:"Shoulder pads you stand under with toes on a raised platform. You rise up onto your toes against the weight.",how:"Shoulders under pads, toes on platform edge. Rise onto toes as high as possible, lower heels below platform for full stretch.",adjust:"Shoulder pad height so you're not cramped or overstretched.",tip:"Some Goodlife gyms have a seated calf raise instead. Either works the same muscle. Slow and controlled beats fast."},
+  {name:"Ab crunch",muscle:"Core, abdominals",cat:"core",icon:"AC",weight:"15-25 kg",look:"You sit with handles or pads at your chest. You crunch forward against resistance.",how:"Grip handles at chest. Crunch forward slowly, curling torso toward knees. Pause, return slowly — don't let weight slam back.",adjust:"Seat so the pivot point aligns with your midsection.",tip:"Slow beats heavy here. The return phase (going back up) is where most of the work happens."},
+  {name:"Treadmill",muscle:"Cardio, full body",cat:"cardio",icon:"TM",weight:"-",look:"Walking belt you stand on. Large console with speed and incline. Usually in a row along the wall or windows.",how:"Step on, press Quick Start. Speed 4.5-5.5 km/h. Set incline to 2-3 minimum.",adjust:"Speed 4.5-5.5 km/h is a good brisk walking pace. Always use incline 2 or more.",tip:"Incline walking burns significantly more calories than flat. Don't hold the handrails."},
+  {name:"Seated bike",muscle:"Cardio, legs",cat:"cardio",icon:"SB",weight:"-",look:"Recumbent (lean back, pedals in front) or upright bike. Easy on the joints. Good cooldown option.",how:"Adjust seat so leg is almost fully extended at bottom of pedal stroke. Moderate resistance. 70-80 RPM.",adjust:"Seat so knees have slight bend at bottom of pedal stroke — never fully locked.",tip:"Recumbent bike is easier on the lower back. Good cooldown after weights — low impact."}
+];
+
+var catColors={upper:{bg:"#f0ebfc",color:"#6b3fc0"},lower:{bg:"#e0f5ee",color:"#0a6b49"},core:{bg:"#fff4d6",color:"#c47a00"},cardio:{bg:"#e6f0fc",color:"#1a65c0"}};
+var completed=JSON.parse(localStorage.getItem("jgCompleted")||"{}");
+var sessionLogs=JSON.parse(localStorage.getItem("jgLogs")||"{}");
+var currentDays=[0,0,0,0];
+var expandedEx=[null,null,null,null];
+var machineFilter="all";
+var expandedMachine=null;
+var currentWeekPage=0;
+
+function logKey(w,d,i){return "log-"+w+"-"+d+"-"+i;}
+function exKey(w,d,i){return w+"-"+d+"-"+i;}
+
+function saveLog(w,d,i,field,val){
+  var k=logKey(w,d,i);
+  if(!sessionLogs[k])sessionLogs[k]={};
+  sessionLogs[k][field]=val;
+  localStorage.setItem("jgLogs",JSON.stringify(sessionLogs));
+  renderWeekPage(w);
+}
+
+function toggleDone(w,d,i,ev){
+  ev.stopPropagation();
+  var k=exKey(w,d,i);
+  if(completed[k]){delete completed[k];}else{completed[k]=true;}
+  localStorage.setItem("jgCompleted",JSON.stringify(completed));
+  renderWeekPage(w);
+}
+
+function showPage(p,el){
+  var pages=document.querySelectorAll(".page");
+  for(var i=0;i<pages.length;i++)pages[i].classList.remove("active");
+  var tabs=document.querySelectorAll(".nav-tab");
+  for(var i=0;i<tabs.length;i++)tabs[i].classList.remove("active");
+  document.getElementById("page-"+p).classList.add("active");
+  el.classList.add("active");
+  if(p==="machines"){renderMachines();return;}
+  var wIdx=parseInt(p.replace("w",""))-1;
+  currentWeekPage=wIdx;
+  renderWeekPage(wIdx);
+}
+
+function setDay(w,i){
+  currentDays[w]=i;
+  expandedEx[w]=null;
+  renderWeekPage(w);
+}
+
+function toggleEx(w,key){
+  expandedEx[w]=expandedEx[w]===key?null:key;
+  renderWeekPage(w);
+}
+
+function countDayLogs(w,d){
+  var wk=allWeeks[w];var day=wk.days[d];
+  if(!day.exercises)return false;
+  for(var i=0;i<day.exercises.length;i++){
+    var lk=logKey(w,d,i);
+    if(sessionLogs[lk]&&(sessionLogs[lk].sets||sessionLogs[lk].reps||sessionLogs[lk].weight))return true;
+  }
+  return false;
+}
+
+function renderWeekPage(w){
+  var wk=allWeeks[w];
+  var el=document.getElementById("page-w"+(w+1));
+  var isBuilt=wk.phase==="Build";
+
+  // Day chips
+  var daysHtml='<div class="day-scroll">';
+  for(var i=0;i<wk.days.length;i++){
+    var d=wk.days[i];
+    var hasLog=d.exercises?countDayLogs(w,i):false;
+    daysHtml+='<div class="day-chip'+(d.type==="rest"?" rest-chip":"")+(i===currentDays[w]?" active":"")+'" onclick="setDay('+w+','+i+')">';
+    daysHtml+='<div class="chip-day">'+d.day+'</div>';
+    daysHtml+='<div class="chip-type '+d.type+'">'+(d.type==="gym"?"Gym":d.type==="walk"?"Walk":"Rest")+'</div>';
+    if(hasLog)daysHtml+='<div class="chip-logged">&#10003;</div>';
+    daysHtml+='</div>';
+  }
+  daysHtml+='</div>';
+
+  // Current day content
+  var d=wk.days[currentDays[w]];
+  var contentHtml='';
+
+  if(d.type==="rest"){
+    contentHtml='<div class="workout-header"><div class="workout-title">'+d.day+' \u2014 Rest</div></div>';
+    contentHtml+='<div class="rest-card"><div class="rest-title">Rest day</div><div class="rest-sub">Recovery is where the gains happen.<br>Stay hydrated, sleep well.</div></div>';
+  } else if(d.type==="walk"){
+    contentHtml='<div class="workout-header"><div class="workout-title">'+d.day+' \u2014 Walk</div><div class="workout-sub">'+d.dur+'</div></div>';
+    contentHtml+='<div class="walk-card"><div class="walk-dur">'+d.dur+'</div><div class="walk-label">Midday walk</div><div class="walk-tips"><div class="walk-tip">Pace: '+d.pace+'</div><div class="walk-tip">Bring water \u2014 Adelaide midday can be warm</div><div class="walk-tip">Great opportunity to take the dog</div></div></div>';
+  } else {
+    var exes=d.exercises;
+    var doneCount=0;
+    for(var i=0;i<exes.length;i++){if(completed[exKey(w,currentDays[w],i)])doneCount++;}
+    var total=exes.length;
+    var pct=total>0?Math.round((doneCount/total)*100):0;
+    var allDone=doneCount===total&&total>0;
+
+    contentHtml+='<div class="workout-header">';
+    contentHtml+='<div class="workout-title">'+d.day+' \u2014 '+d.label+'</div>';
+    contentHtml+='<div class="workout-sub">'+d.dur+' &middot; '+wk.sub+'</div>';
+    contentHtml+='<div class="progress-label"><span>'+doneCount+' of '+total+' done</span><span>'+pct+'%</span></div>';
+    contentHtml+='<div class="progress-bar-wrap"><div class="progress-bar" style="width:'+pct+'%"></div></div>';
+    contentHtml+='</div>';
+
+    contentHtml+='<div class="ex-list">';
+    for(var i=0;i<exes.length;i++){
+      var e=exes[i];
+      var key=exKey(w,currentDays[w],i);
+      var lkey=logKey(w,currentDays[w],i);
+      var isDone=!!completed[key];
+      var isExp=expandedEx[w]===key;
+      var log=sessionLogs[lkey]||{};
+      var hasLog=log.sets||log.reps||log.weight;
+      var cc=catColors[e.cat]||catColors.upper;
+      var tickSvg='<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="'+(isDone?"#fff":"#ccc")+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+      contentHtml+='<div class="ex-card'+(isExp?" expanded":"")+(isDone?" done-card":"")+'" onclick="toggleEx('+w+',\''+key+'\')"> ';
+      contentHtml+='<div class="ex-top">';
+      contentHtml+='<div class="ex-icon" style="background:'+cc.bg+';color:'+cc.color+'">'+e.icon+'</div>';
+      contentHtml+='<div class="ex-info">';
+      contentHtml+='<div class="ex-name">'+e.name+'</div>';
+      contentHtml+='<div class="ex-muscle">'+e.muscle+'</div>';
+      contentHtml+='<div class="ex-badges">';
+      contentHtml+='<span class="badge badge-sets">'+e.sets+'x'+e.reps+'</span>';
+      if(e.weight!=="-")contentHtml+='<span class="badge badge-weight">'+e.weight+'</span>';
+      contentHtml+='<span class="badge badge-rest">'+e.rest+'</span>';
+      if(hasLog)contentHtml+='<span class="badge badge-logged">&#10003; logged</span>';
+      contentHtml+='</div></div>';
+      contentHtml+='<div class="ex-tick'+(isDone?" ticked":"")+'" onclick="toggleDone('+w+','+currentDays[w]+','+i+',event)">'+tickSvg+'</div>';
+      contentHtml+='<div class="chevron">&#9660;</div>';
+      contentHtml+='</div>';
+
+      if(isExp){
+        contentHtml+='<div class="ex-detail">';
+        contentHtml+='<div class="ex-detail-grid">';
+        contentHtml+='<div class="ex-stat"><div class="ex-stat-n">'+e.sets+'</div><div class="ex-stat-l">Target sets</div></div>';
+        contentHtml+='<div class="ex-stat"><div class="ex-stat-n">'+e.reps+'</div><div class="ex-stat-l">Target reps</div></div>';
+        contentHtml+='<div class="ex-stat"><div class="ex-stat-n">'+e.rest+'</div><div class="ex-stat-l">Rest</div></div>';
+        contentHtml+='</div>';
+        contentHtml+='<div class="ex-note">'+e.note+'</div>';
+
+        contentHtml+='<div class="log-section">';
+        contentHtml+='<div class="log-title">Log your actual session</div>';
+        contentHtml+='<div class="log-fields">';
+
+        contentHtml+='<div class="log-field">';
+        contentHtml+='<div class="log-label">Sets done</div>';
+        contentHtml+='<input class="log-input" type="number" inputmode="numeric" placeholder="'+e.sets+'" value="'+(log.sets||'')+'" onchange="saveLog('+w+','+currentDays[w]+','+i+',\'sets\',this.value)" onclick="event.stopPropagation()">';
+        contentHtml+='<div class="log-suggest">Target: '+e.sets+'</div>';
+        contentHtml+='</div>';
+
+        contentHtml+='<div class="log-field">';
+        contentHtml+='<div class="log-label">Reps per set</div>';
+        contentHtml+='<input class="log-input" type="number" inputmode="numeric" placeholder="10" value="'+(log.reps||'')+'" onchange="saveLog('+w+','+currentDays[w]+','+i+',\'reps\',this.value)" onclick="event.stopPropagation()">';
+        contentHtml+='<div class="log-suggest">Target: '+e.reps+'</div>';
+        contentHtml+='</div>';
+
+        if(e.weight!=="-"){
+          contentHtml+='<div class="log-field">';
+          contentHtml+='<div class="log-label">Weight (kg)</div>';
+          contentHtml+='<input class="log-input" type="number" inputmode="decimal" placeholder="kg" value="'+(log.weight||'')+'" onchange="saveLog('+w+','+currentDays[w]+','+i+',\'weight\',this.value)" onclick="event.stopPropagation()">';
+          contentHtml+='<div class="log-suggest">Guide: '+e.weight+'</div>';
+          contentHtml+='</div>';
+        } else {
+          contentHtml+='<div class="log-field">';
+          contentHtml+='<div class="log-label">Duration</div>';
+          contentHtml+='<input class="log-input" type="text" placeholder="'+e.reps+'" value="'+(log.weight||'')+'" onchange="saveLog('+w+','+currentDays[w]+','+i+',\'weight\',this.value)" onclick="event.stopPropagation()">';
+          contentHtml+='<div class="log-suggest">Target: '+e.reps+'</div>';
+          contentHtml+='</div>';
+        }
+        contentHtml+='</div></div>';
+
+        contentHtml+='<button class="tick-btn'+(isDone?" ticked":"")+'" onclick="toggleDone('+w+','+currentDays[w]+','+i+',event)">';
+        contentHtml+=isDone?"&#10003; Done!":"Mark as done";
+        contentHtml+='</button>';
+        contentHtml+='</div>';
+      }
+      contentHtml+='</div>';
+    }
+    contentHtml+='</div>';
+    contentHtml+='<div class="tip-box" style="margin-top:10px">Tap an exercise to log your actual sets, reps and weight. Saved on this device.</div>';
+    contentHtml+='<div class="done-banner'+(allDone?" show":"")+'"><div class="done-banner-text">Session complete!</div><div class="done-banner-sub">Great work John \u2014 rest up and recover well.</div></div>';
+  }
+
+  el.innerHTML =
+    '<div class="week-banner'+(isBuilt?" build":"")+'">' +
+      '<div class="week-num">Week '+wk.num+' \u2014 '+wk.phase+'</div>' +
+      '<div class="week-title">'+wk.sub+'</div>' +
+    '</div>' +
+    daysHtml +
+    contentHtml +
+    '<div class="pb"></div>';
+}
+
+function renderMachines(){
+  var filters=["all","upper","lower","core","cardio"];
+  var labels={all:"All",upper:"Upper body",lower:"Lower body",core:"Core",cardio:"Cardio"};
+  var fHtml="";
+  for(var i=0;i<filters.length;i++){
+    fHtml+='<div class="filter-chip'+(machineFilter===filters[i]?" active":"")+'" onclick="setMachineFilter(\''+filters[i]+'\')">'+labels[filters[i]]+'</div>';
+  }
+  document.getElementById("machine-filters").innerHTML=fHtml;
+  var filtered=machineFilter==="all"?machines:machines.filter(function(m){return m.cat===machineFilter;});
+  var mHtml="";
+  for(var i=0;i<filtered.length;i++){
+    var m=filtered[i];
+    var cc=catColors[m.cat]||catColors.upper;
+    var isExp=expandedMachine===m.name;
+    mHtml+='<div class="machine-card'+(isExp?" expanded":"")+'" onclick="toggleMachine(\''+m.name.replace(/'/g,"\\'")+'\')"> ';
+    mHtml+='<div class="mc-top">';
+    mHtml+='<div class="mc-icon" style="background:'+cc.bg+';color:'+cc.color+'">'+m.icon+'</div>';
+    mHtml+='<div style="flex:1"><div class="mc-name">'+m.name+'</div><div class="mc-muscle">'+m.muscle+'</div></div>';
+    if(m.weight!=="-")mHtml+='<span class="badge badge-weight" style="flex-shrink:0;margin-right:6px">'+m.weight+'</span>';
+    mHtml+='<div class="chevron">&#9660;</div>';
+    mHtml+='</div>';
+    if(isExp){
+      mHtml+='<div class="mc-detail">';
+      mHtml+='<div class="mc-section"><div class="mc-label">What to look for</div><div class="mc-text">'+m.look+'</div></div>';
+      mHtml+='<div class="mc-section"><div class="mc-label">How to use it</div><div class="mc-text">'+m.how+'</div></div>';
+      mHtml+='<div class="mc-section"><div class="mc-label">What to adjust</div><div class="mc-text">'+m.adjust+'</div></div>';
+      if(m.weight!=="-")mHtml+='<div class="mc-section"><div class="mc-label">Suggested starting weight</div><span class="mc-weight">'+m.weight+'</span></div>';
+      mHtml+='<div class="mc-tip">'+m.tip+'</div>';
+      mHtml+='<a class="yt-btn" onclick="event.stopPropagation();openYouTube(\''+m.name+' machine\')"><div class="yt-play"><div class="yt-tri"></div></div>Watch on YouTube</a>';
+      mHtml+='</div>';
+    }
+    mHtml+='</div>';
+  }
+  document.getElementById("machine-list").innerHTML=mHtml;
+}
+
+function setMachineFilter(f){machineFilter=f;expandedMachine=null;renderMachines();}
+function toggleMachine(name){expandedMachine=expandedMachine===name?null:name;renderMachines();}
+function openYouTube(name){var q=encodeURIComponent("how to use "+name+" for beginners");window.open("https://www.youtube.com/results?search_query="+q,"_blank");}
+
+renderWeekPage(0);
+</script>
+</body>
+</html>
